@@ -1,0 +1,88 @@
+import type { PitchSummary, PitchDetail, Session, AllTimeStats, Voice } from './types'
+
+export const DEMO_PITCHES: PitchSummary[] = [
+  { pitchNumber: 1, title: 'The Last Cartel', format: 'SERIES', projectId: 'demo-p1', hasSpeech: false, verdictStatus: 'approve', devStage: 'development' },
+  { pitchNumber: 2, title: 'Aztec Rising', format: 'FILM', projectId: 'demo-p2', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 3, title: 'Daughters of the Sun', format: 'SERIES', projectId: 'demo-p3', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 4, title: 'Borderline', format: 'FILM', projectId: 'demo-p4', hasSpeech: false, verdictStatus: 'reject', devStage: 'killed' },
+  { pitchNumber: 5, title: 'Ciudad de Luz', format: 'SERIES', projectId: 'demo-p5', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 6, title: 'The Painter of Oaxaca', format: 'FILM', projectId: 'demo-p6', hasSpeech: false, verdictStatus: 'vault', devStage: 'vaulted' },
+  { pitchNumber: 7, title: 'Noche Oscura', format: 'FILM', projectId: 'demo-p7', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 8, title: 'Familia', format: 'SERIES', projectId: 'demo-p8', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 9, title: 'The Jaguar Protocol', format: 'FILM', projectId: 'demo-p9', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 10, title: 'Plata y Fuego', format: 'SERIES', projectId: 'demo-p10', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 11, title: 'El Silencio', format: 'FILM', projectId: 'demo-p11', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+  { pitchNumber: 12, title: 'Mercado Negro', format: 'SERIES', projectId: 'demo-p12', hasSpeech: false, verdictStatus: null, devStage: 'pitch' },
+]
+
+export const DEMO_PITCH_DETAILS: Record<string, PitchDetail> = {
+  'demo-p2': {
+    pitchNumber: 2,
+    title: 'Aztec Rising',
+    format: 'FILM',
+    projectId: 'demo-p2',
+    hasSpeech: false,
+    verdictStatus: null,
+    devStage: 'pitch',
+    platform: 'Netflix',
+    genre: 'Historical Epic',
+    logline: 'A disgraced Aztec warrior must unite rival factions to repel the Spanish conquest — or die watching his civilization burn.',
+    cleanScript: `Picture this: it's 1519. The Aztec empire is at its peak — thousands of warriors, a city that dwarfs anything in Europe, a civilization that has survived centuries of conquest. And then a small band of Spanish soldiers arrives on the coast.\n\nMost history books tell you what happened next. But we want to tell you why — from the inside.\n\nAztec Rising follows Itzcoatl, a decorated eagle warrior who falls from grace after questioning the emperor's decision to receive Cortés as a guest. Exiled, he travels the empire's edges and witnesses the cracks: tributary cities ready to rebel, priests who see omens everywhere, warriors who've never lost a real war against someone with gunpowder.\n\nWhen Cortés begins his march to Tenochtitlan, Itzcoatl must choose: defect to the Spanish and gain revenge on his emperor, ally with the tributary rebels, or find a third path — one that might preserve something of the world he loves.\n\nThis is a $60 million prestige epic for Netflix. Think Apocalypto meets Lawrence of Arabia. We're in talks with a director who shot Narcos and two major Indigenous Mexican studios for authentic cultural collaboration.\n\nThis is the story Hollywood has never told correctly. We're going to change that.`,
+  },
+  'demo-p3': {
+    pitchNumber: 3,
+    title: 'Daughters of the Sun',
+    format: 'SERIES',
+    projectId: 'demo-p3',
+    hasSpeech: false,
+    verdictStatus: null,
+    devStage: 'pitch',
+    platform: 'Apple TV+',
+    genre: 'Drama',
+    logline: 'Four generations of women in a Guadalajara dynasty navigate love, ambition, and the secrets that could destroy everything their family built.',
+    cleanScript: `Daughters of the Sun is a multi-generational family saga set across seventy years of Mexican history — from the economic miracle of the 1950s through the narco wars of today.\n\nAt the center is the Vega family. The patriarch built an empire in textiles. But this isn't his story. It's the story of the four women who actually kept it alive.\n\nAbuela Consuelo, who made deals with politicians and priests to survive the '68 massacre. Her daughter Marta, who took the business international while hiding a secret that could end the family. Granddaughter Valentina, a corporate attorney who discovers those secrets when she's asked to defend the family in a money-laundering investigation. And great-granddaughter Sofía, nineteen years old, who just wants to leave Mexico City and make films — until she finds out she can't.\n\nEach episode weaves two timelines: the 1970s and today. What the women knew. What they didn't say. And what the next generation inherits whether they want it or not.\n\nWe're pitching this as six episodes, Apple TV+ level production, with a showrunner who did three seasons of Narcos Mexico and one of the writers from Betty en NY. Authentic, prestige, and unlike anything streaming in English right now.\n\nThis is a show that will win awards. And more importantly, it will make people feel something.`,
+  },
+  'demo-p5': {
+    pitchNumber: 5,
+    title: 'Ciudad de Luz',
+    format: 'SERIES',
+    projectId: 'demo-p5',
+    hasSpeech: false,
+    verdictStatus: null,
+    devStage: 'pitch',
+    platform: 'HBO Max',
+    genre: 'Thriller',
+    logline: 'A photojournalist returns to Mexico City to investigate her mentor\'s murder and uncovers a conspiracy that reaches the highest levels of government.',
+    cleanScript: `Ciudad de Luz — City of Light. That's the nickname Mexicans give Mexico City. Nineteen million people. The largest Spanish-speaking city on Earth. And for our protagonist, the most dangerous place she's ever been.\n\nLuna Castillo is a photojournalist. She left Mexico City ten years ago after her mentor, the legendary investigative photographer Rodrigo Vela, told her to run. She never knew why. Then Rodrigo turns up dead — ruled a suicide, his archives destroyed.\n\nLuna comes back. She starts pulling threads. What she finds is a network of corruption that connects the cartels, the federal government, and — most dangerously — a tech billionaire who's been building a surveillance infrastructure that makes Mexico's elites untouchable.\n\nThis is eight episodes, HBO Max, in the vein of Succession meets The Wire, set entirely in Mexico City. We shoot in CDMX, we use local talent for 80% of the cast, and we have a producing partner who did Narcos and Club de Cuervos.\n\nThe story is ripped from reality — based on the actual murder of a journalist whose archives were destroyed hours after her death. We've optioned the rights from her family.\n\nThis is the kind of show that changes the conversation about Mexico — about its complexity, its brilliance, its danger, and its beauty.`,
+  },
+}
+
+export const DEMO_SESSIONS: Session[] = [
+  {
+    id: 'session-demo-1',
+    name: 'Pitch Session · 12 Films · 5 Series',
+    createdAt: '2026-06-21T00:00:00.000Z',
+    pitchIds: DEMO_PITCHES.map(p => p.projectId),
+    verdicts: { 'demo-p1': 'approve', 'demo-p4': 'reject', 'demo-p6': 'vault' },
+  },
+  {
+    id: 'session-demo-2',
+    name: 'Pitch Session · 8 Films · 3 Series',
+    createdAt: '2026-05-14T00:00:00.000Z',
+    pitchIds: ['demo-old-1', 'demo-old-2', 'demo-old-3'],
+    verdicts: { 'demo-old-1': 'approve', 'demo-old-2': 'reject', 'demo-old-3': 'vault' },
+  },
+]
+
+export const DEMO_STATS: AllTimeStats = {
+  approved: 124,
+  vaulted: 47,
+  rejected: 89,
+  pending: 23,
+}
+
+export const DEMO_VOICES: Voice[] = [
+  { id: 'demo-voice-1', name: 'Alejandro', description: 'Deep, authoritative male voice', preview_url: null },
+  { id: 'demo-voice-2', name: 'Sofia', description: 'Warm, professional female voice', preview_url: null },
+  { id: 'demo-voice-3', name: 'Rafael', description: 'Calm, cinematic male narrator', preview_url: null },
+]
