@@ -16,8 +16,8 @@ function formatTime(s: number): string {
   return `${m}:${sec.toString().padStart(2, '0')}`
 }
 
-const RING_R = 37
-const RING_SIZE = 80
+const RING_R   = 44
+const RING_SIZE = 96
 const CIRCUMFERENCE = 2 * Math.PI * RING_R
 
 interface Props {
@@ -27,13 +27,14 @@ interface Props {
 }
 
 export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const [playing, setPlaying] = useState(false)
+  const audioRef   = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying]         = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [speed, setSpeed] = useState<Speed>(1)
+  const [duration, setDuration]       = useState(0)
+  const [loading, setLoading]         = useState(true)
+  const [error, setError]             = useState('')
+  const [speed, setSpeed]             = useState<Speed>(1)
+  const [seeking, setSeeking]         = useState(false)
 
   useEffect(() => {
     const audio = audioRef.current
@@ -64,29 +65,29 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
       setDuration(audio.duration)
       if (autoPlay) audio.play().catch(() => setPlaying(false))
     }
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime)
+    const onTimeUpdate    = () => { if (!seeking) setCurrentTime(audio.currentTime) }
     const onDurationChange = () => setDuration(audio.duration)
-    const onPlay = () => setPlaying(true)
-    const onPause = () => setPlaying(false)
-    const onEnded = () => setPlaying(false)
-    const onError = () => { setLoading(false); setError('Audio unavailable') }
+    const onPlay          = () => setPlaying(true)
+    const onPause         = () => setPlaying(false)
+    const onEnded         = () => setPlaying(false)
+    const onError         = () => { setLoading(false); setError('Audio unavailable') }
 
-    audio.addEventListener('canplay', onCanPlay)
-    audio.addEventListener('timeupdate', onTimeUpdate)
-    audio.addEventListener('durationchange', onDurationChange)
-    audio.addEventListener('play', onPlay)
-    audio.addEventListener('pause', onPause)
-    audio.addEventListener('ended', onEnded)
-    audio.addEventListener('error', onError)
+    audio.addEventListener('canplay',         onCanPlay)
+    audio.addEventListener('timeupdate',      onTimeUpdate)
+    audio.addEventListener('durationchange',  onDurationChange)
+    audio.addEventListener('play',            onPlay)
+    audio.addEventListener('pause',           onPause)
+    audio.addEventListener('ended',           onEnded)
+    audio.addEventListener('error',           onError)
 
     return () => {
-      audio.removeEventListener('canplay', onCanPlay)
-      audio.removeEventListener('timeupdate', onTimeUpdate)
-      audio.removeEventListener('durationchange', onDurationChange)
-      audio.removeEventListener('play', onPlay)
-      audio.removeEventListener('pause', onPause)
-      audio.removeEventListener('ended', onEnded)
-      audio.removeEventListener('error', onError)
+      audio.removeEventListener('canplay',         onCanPlay)
+      audio.removeEventListener('timeupdate',      onTimeUpdate)
+      audio.removeEventListener('durationchange',  onDurationChange)
+      audio.removeEventListener('play',            onPlay)
+      audio.removeEventListener('pause',           onPause)
+      audio.removeEventListener('ended',           onEnded)
+      audio.removeEventListener('error',           onError)
       audio.pause()
     }
   }, [projectId, voiceId, autoPlay])
@@ -104,6 +105,12 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
     audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + delta))
   }
 
+  const handleScrubChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const t = parseFloat(e.target.value)
+    setCurrentTime(t)
+    if (audioRef.current) audioRef.current.currentTime = t
+  }
+
   const progress = duration > 0 ? currentTime / duration : 0
   const strokeDashoffset = CIRCUMFERENCE * (1 - progress)
 
@@ -113,26 +120,55 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
       {playing && <div className="audio-scanline" />}
 
       <div className="audio-controls">
+        {/* Skip back */}
         <button className="audio-btn skip-btn" onClick={() => skip(-15)} aria-label="Skip back 15s">
-          <span className="skip-icon">↺</span><span className="skip-num">15</span>
+          <span className="skip-icon">↺</span>
+          <span className="skip-num">15s</span>
         </button>
 
+        {/* Ring + play button */}
         <div className="audio-ring-wrap">
-          <svg className="audio-ring-svg" width={RING_SIZE} height={RING_SIZE} aria-hidden="true">
+          <svg
+            className="audio-ring-svg"
+            width={RING_SIZE}
+            height={RING_SIZE}
+            aria-hidden="true"
+          >
+            {/* Pulse ring — only shown when playing */}
+            {playing && (
+              <circle
+                className="ring-pulse"
+                cx={RING_SIZE / 2}
+                cy={RING_SIZE / 2}
+                r={RING_R + 6}
+              />
+            )}
+
+            {/* Track */}
             <circle
               cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
-              fill="none" stroke="var(--border)" strokeWidth="2"
+              fill="none"
+              stroke="var(--border)"
+              strokeWidth="2"
             />
+
+            {/* Progress arc */}
             <circle
               cx={RING_SIZE / 2} cy={RING_SIZE / 2} r={RING_R}
-              fill="none" stroke="var(--accent)" strokeWidth="2"
+              fill="none"
+              stroke="var(--accent)"
+              strokeWidth="2"
               strokeDasharray={CIRCUMFERENCE}
               strokeDashoffset={strokeDashoffset}
               strokeLinecap="round"
               transform={`rotate(-90 ${RING_SIZE / 2} ${RING_SIZE / 2})`}
-              style={{ transition: 'stroke-dashoffset 0.25s linear', filter: 'drop-shadow(0 0 3px var(--accent))' }}
+              style={{
+                transition: 'stroke-dashoffset 0.2s linear',
+                filter: 'drop-shadow(0 0 4px var(--accent))',
+              }}
             />
           </svg>
+
           <button
             className={`audio-play-btn${playing ? ' audio-play-btn--playing' : ''}`}
             onClick={togglePlay}
@@ -143,9 +179,11 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
           </button>
         </div>
 
+        {/* Skip forward + speed */}
         <div className="audio-skip-speed">
           <button className="audio-btn skip-btn" onClick={() => skip(30)} aria-label="Skip forward 30s">
-            <span className="skip-icon">↻</span><span className="skip-num">30</span>
+            <span className="skip-icon">↻</span>
+            <span className="skip-num">30s</span>
           </button>
           <button
             className="speed-badge"
@@ -156,6 +194,23 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
           </button>
         </div>
       </div>
+
+      {/* Scrub slider */}
+      <input
+        type="range"
+        className="audio-scrub"
+        min={0}
+        max={duration || 100}
+        step={0.1}
+        value={currentTime}
+        onChange={handleScrubChange}
+        onMouseDown={() => setSeeking(true)}
+        onMouseUp={() => setSeeking(false)}
+        onTouchStart={() => setSeeking(true)}
+        onTouchEnd={() => setSeeking(false)}
+        disabled={loading || !!error || isDemo || duration === 0}
+        aria-label="Seek"
+      />
 
       <div className="audio-times">
         <span className="audio-time">{formatTime(currentTime)}</span>
