@@ -1,0 +1,25 @@
+# Add this block to /etc/caddy/Caddyfile on Hostinger VPS
+# Run: systemctl reload caddy
+
+pitch.billyrovzar.com {
+    root * /var/www/lemon-pitch-pwa
+    encode gzip
+
+    # Service worker — never cache
+    @sw path /sw.js
+    header @sw Cache-Control "no-cache, no-store, must-revalidate"
+
+    # Hashed assets — cache forever
+    @assets path /assets/*
+    header @assets Cache-Control "public, max-age=31536000, immutable"
+
+    # PWA manifest
+    @manifest path /manifest.webmanifest
+    header @manifest Cache-Control "public, max-age=3600"
+    header @manifest Content-Type "application/manifest+json"
+
+    # SPA: everything else → index.html
+    try_files {path} /index.html
+
+    file_server
+}
