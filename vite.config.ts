@@ -15,7 +15,7 @@ export default defineConfig({
         theme_color: '#0D0D0D',
         background_color: '#0D0D0D',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'any',
         scope: '/',
         start_url: '/',
         icons: [
@@ -39,16 +39,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/static1\.squarespace\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'logo-cache',
-              expiration: { maxEntries: 5, maxAgeSeconds: 60 * 60 * 24 * 30 },
-            },
-          },
-        ],
+        runtimeCaching: [],
       },
     }),
   ],

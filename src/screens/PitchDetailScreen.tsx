@@ -51,9 +51,8 @@ export function PitchDetailScreen({
   const position = posIndex + 1
   const total = sessionPitchIds.length
 
-  const currentVerdict: VerdictStatus = isDemo
-    ? DEMO_PITCHES.find(p => p.projectId === projectId)?.verdictStatus ?? null
-    : (session?.verdicts[projectId] ?? null)
+  const currentVerdict: VerdictStatus = session?.verdicts[projectId]
+    ?? (isDemo ? DEMO_PITCHES.find(p => p.projectId === projectId)?.verdictStatus ?? null : null)
 
   const nextPitchId = useMemo(() => {
     const pending = sessionPitchIds.filter(id => id !== projectId && !session?.verdicts[id])
@@ -144,7 +143,8 @@ export function PitchDetailScreen({
     if (isDemo) {
       showToast('Demo mode — not saved')
       onVerdictRecorded(projectId, v)
-      if (autoAdvance) advanceToNext(v)
+      if (autoAdvance) advanceToNext(v);
+      (document.activeElement as HTMLElement)?.blur()
       return
     }
 
@@ -156,7 +156,8 @@ export function PitchDetailScreen({
     } catch {
       showToast('Failed to submit — try again')
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
+      (document.activeElement as HTMLElement)?.blur()
     }
   }
 

@@ -1,10 +1,13 @@
 import { useState, useCallback } from 'react'
 import type { Session, VerdictStatus } from './types'
+import { isDemo } from './api'
+import { DEMO_SESSIONS } from './demo'
 
 const SESSIONS_KEY = 'lemon_sessions'
 const ACTIVE_SESSION_KEY = 'lemon_active_session'
 
 function loadSessions(): Session[] {
+  if (isDemo) return DEMO_SESSIONS.map(s => ({ ...s, verdicts: { ...s.verdicts } }))
   try {
     const raw = localStorage.getItem(SESSIONS_KEY)
     return raw ? (JSON.parse(raw) as Session[]) : []
@@ -14,6 +17,7 @@ function loadSessions(): Session[] {
 }
 
 function saveSessions(sessions: Session[]): void {
+  if (isDemo) return
   localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions))
 }
 
@@ -22,6 +26,7 @@ function loadActiveSessionId(): string | null {
 }
 
 function saveActiveSessionId(id: string | null): void {
+  if (isDemo) return
   if (id) {
     localStorage.setItem(ACTIVE_SESSION_KEY, id)
   } else {

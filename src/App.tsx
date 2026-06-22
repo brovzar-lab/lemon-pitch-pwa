@@ -34,11 +34,11 @@ export default function App() {
     : screen.name === 'pitch' ? screen.sessionId
     : null
 
-  // Resolve the current session object
+  // Resolve the current session object — check live store first so recorded verdicts are visible
   const currentSession: Session | null = useMemo(() => {
     if (!currentSessionId) return null
-    if (isDemo) return DEMO_SESSIONS.find(s => s.id === currentSessionId) ?? null
-    return sessions.find(s => s.id === currentSessionId) ?? null
+    return sessions.find(s => s.id === currentSessionId)
+      ?? (isDemo ? DEMO_SESSIONS.find(s => s.id === currentSessionId) ?? null : null)
   }, [currentSessionId, sessions])
 
   // In demo mode, auto-populate pitches when entering a session or pitch screen
@@ -65,7 +65,7 @@ export default function App() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement
       const tag = target.tagName
-      if (tag === 'INPUT' || tag === 'BUTTON' || tag === 'SELECT' || tag === 'TEXTAREA') return
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return
 
       switch (e.key) {
         case ' ':
@@ -116,7 +116,7 @@ export default function App() {
   }
 
   const handleVerdictRecorded = (projectId: string, verdict: VerdictStatus) => {
-    if (screen.name === 'pitch' && !isDemo) {
+    if (screen.name === 'pitch') {
       recordVerdict(screen.sessionId, projectId, verdict)
     }
   }
