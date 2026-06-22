@@ -3,10 +3,16 @@ import { audioUrl, isDemo } from '../api'
 
 const SPEEDS = [1, 1.25, 1.5, 2, 0.75] as const
 type Speed = typeof SPEEDS[number]
+const SPEED_KEY = 'pitch-playback-speed'
 
 function nextSpd(s: Speed): Speed {
   const i = SPEEDS.indexOf(s)
   return SPEEDS[(i + 1) % SPEEDS.length]
+}
+
+function savedSpeed(): Speed {
+  const v = parseFloat(localStorage.getItem(SPEED_KEY) ?? '1') as Speed
+  return SPEEDS.includes(v) ? v : 1
 }
 
 function formatTime(s: number): string {
@@ -40,7 +46,7 @@ export const AudioPlayer = forwardRef<AudioPlayerHandle, Props>(function AudioPl
   const [duration, setDuration]       = useState(0)
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState('')
-  const [speed, setSpeed]             = useState<Speed>(1)
+  const [speed, setSpeed]             = useState<Speed>(savedSpeed)
   const [seeking, setSeeking]         = useState(false)
 
   useEffect(() => {
@@ -196,7 +202,11 @@ export const AudioPlayer = forwardRef<AudioPlayerHandle, Props>(function AudioPl
           </button>
           <button
             className="speed-badge"
-            onClick={() => setSpeed(nextSpd(speed))}
+            onClick={() => {
+              const next = nextSpd(speed)
+              setSpeed(next)
+              localStorage.setItem(SPEED_KEY, next.toString())
+            }}
             aria-label="Change playback speed"
           >
             {speed === 1 ? '1×' : `${speed}×`}

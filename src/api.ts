@@ -58,3 +58,8 @@ export async function submitVerdict(projectId: string, verdict: Exclude<VerdictS
     throw new Error(`Verdict failed: ${res.status} ${text}`)
   }
 }
+
+export async function undoVerdict(projectId: string): Promise<void> {
+  const res = await fetch(`${API_BASE}/pitches/${projectId}/verdict`, { method: 'DELETE' })
+  if (!res.ok) throw new Error(`Undo verdict failed: ${res.status}`)
+}

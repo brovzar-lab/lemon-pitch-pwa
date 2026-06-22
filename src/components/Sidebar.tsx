@@ -11,6 +11,8 @@ interface Props {
   onSelectSession: (id: string) => void
   onStartSession: (pitches: PitchSummary[]) => void
   onRefresh: () => void
+  onVaultOpen: () => void
+  onRenameSession: (sessionId: string, name: string) => void
   syncing: boolean
 }
 
@@ -39,6 +41,8 @@ export function Sidebar({
   onSelectSession,
   onStartSession,
   onRefresh,
+  onVaultOpen,
+  onRenameSession,
   syncing,
 }: Props) {
   const [pitches, setPitches] = useState<PitchSummary[]>([])
@@ -124,6 +128,15 @@ export function Sidebar({
         </div>
       </div>
 
+      {/* Vault link */}
+      {!isDemo && (
+        <div className="sidebar-vault">
+          <button className="sidebar-vault-btn" onClick={onVaultOpen}>
+            VAULT{backendStats ? ` (${backendStats.vaulted})` : ''}
+          </button>
+        </div>
+      )}
+
       {/* Sessions list */}
       <div className="sidebar-sessions">
         {displaySessions.length > 0 && (
@@ -135,7 +148,16 @@ export function Sidebar({
                 className={`sidebar-session-item${s.id === currentSessionId ? ' active' : ''}`}
                 onClick={() => onSelectSession(s.id)}
               >
-                <div className="sidebar-session-name">{s.name}</div>
+                <span
+                  className="sidebar-session-name"
+                  contentEditable
+                  suppressContentEditableWarning
+                  onMouseDown={e => e.stopPropagation()}
+                  onClick={e => e.stopPropagation()}
+                  onBlur={e => onRenameSession(s.id, e.currentTarget.textContent ?? '')}
+                >
+                  {s.name}
+                </span>
                 <div className="sidebar-session-pills">{pillForSession(s)}</div>
               </div>
             ))}

@@ -2,14 +2,22 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { PitchDetail, PitchSummary, Session, VerdictStatus } from '../types'
 import type { Voice } from '../types'
 import type { AudioPlayerHandle } from '../components/AudioPlayer'
-import { fetchPitchDetail, fetchVoices, submitVerdict, audioUrl, isDemo } from '../api'
+import { fetchPitchDetail, fetchVoices, submitVerdict, undoVerdict, audioUrl, isDemo } from '../api'
 import { DEMO_PITCHES, DEMO_PITCH_DETAILS, DEMO_VOICES } from '../demo'
 import { AudioPlayer } from '../components/AudioPlayer'
 import { VerdictStrip } from '../components/VerdictStrip'
 
 const VOICE_KEY = 'lemon_voice'
+const NOTE_KEY = (id: string) => `pitch-note-${id}`
+const VERDICT_LABELS: Record<string, string> = { approve: 'Approved', vault: 'Vaulted', reject: 'Rejected' }
 
-export type KeyboardAction = 'play' | 'approve' | 'vault' | 'reject' | 'prev' | 'next' | null
+export type KeyboardAction = 'play' | 'approve' | 'vault' | 'reject' | 'prev' | 'next' | 'skip' | 'undo' | null
+
+interface UndoState {
+  projectId: string
+  label: string
+  countdown: number
+}
 
 interface Props {
   projectId: string
@@ -19,6 +27,7 @@ interface Props {
   onBack: () => void
   onVerdictRecorded: (projectId: string, verdict: VerdictStatus) => void
   onNavigatePitch: (projectId: string) => void
+  onSkip?: () => void
   pendingKeyboardAction?: KeyboardAction
   onKeyboardActionHandled?: () => void
   isDesktopCenter?: boolean
@@ -32,6 +41,7 @@ export function PitchDetailScreen({
   onBack,
   onVerdictRecorded,
   onNavigatePitch,
+  onSkip,
   pendingKeyboardAction,
   onKeyboardActionHandled,
   isDesktopCenter = false,
@@ -43,6 +53,10 @@ export function PitchDetailScreen({
   const [autoAdvance, setAutoAdvance] = useState(true)
   const [voices, setVoices] = useState<Voice[]>([])
   const [selectedVoice, setSelectedVoice] = useState<string>(() => localStorage.getItem(VOICE_KEY) ?? '')
+  const [voiceSearch, setVoiceSearch] = useState('')
+  const [undoPending, setUndoPending] = useState<UndoState | null>(null)
+  const [note, setNote] = useState<string>(() => localStorage.getItem(NOTE_KEY(projectId)) ?? '')
+  const undoTimerRef = useRef<{ timeout: ReturnType<typeof setTimeout>; interval: ReturnType<typeof setInterval> } | null>(null)
   const audioRef = useRef<AudioPlayerHandle>(null)
 
   const session = sessions.find(s => s.id === sessionId)
@@ -58,6 +72,14 @@ export function PitchDetailScreen({
     const pending = sessionPitchIds.filter(id => id !== projectId && !session?.verdicts[id])
     return pending[0] ?? null
   }, [sessionPitchIds, projectId, session])
+
+  // Clear undo timer on unmount
+  useEffect(() => () => clearUndoTimer(), []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Reset note when pitch changes
+  useEffect(() => {
+    setNote(localStorage.getItem(NOTE_KEY(projectId)) ?? '')
+  }, [projectId])
 
   // Load voices once
   useEffect(() => {
@@ -128,11 +150,53 @@ export function PitchDetailScreen({
           if (nextId) onNavigatePitch(nextId)
           break
         }
+        case 'skip':
+          onSkip?.()
+          break
+        case 'undo':
+          handleUndoRef.current()
+          break
       }
     }
 
     handleAction().finally(() => onKeyboardActionHandled?.())
   }, [pendingKeyboardAction]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const clearUndoTimer = () => {
+    if (undoTimerRef.current) {
+      clearTimeout(undoTimerRef.current.timeout)
+      clearInterval(undoTimerRef.current.interval)
+      undoTimerRef.current = null
+    }
+  }
+
+  const startUndoCountdown = (pid: string, label: string) => {
+    clearUndoTimer()
+    setUndoPending({ projectId: pid, label, countdown: 5 })
+    const interval = setInterval(() => {
+      setUndoPending(prev => prev ? { ...prev, countdown: prev.countdown - 1 } : null)
+    }, 1000)
+    const timeout = setTimeout(() => {
+      clearInterval(interval)
+      undoTimerRef.current = null
+      setUndoPending(null)
+    }, 5000)
+    undoTimerRef.current = { timeout, interval }
+  }
+
+  const handleUndo = async () => {
+    if (!undoPending) return
+    const { projectId: pid } = undoPending
+    clearUndoTimer()
+    setUndoPending(null)
+    onVerdictRecorded(pid, null)
+    if (!isDemo) {
+      try { await undoVerdict(pid) } catch { showToast('Undo failed') }
+    }
+  }
+
+  const handleUndoRef = useRef(handleUndo)
+  handleUndoRef.current = handleUndo
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -143,6 +207,7 @@ export function PitchDetailScreen({
     if (isDemo) {
       showToast('Demo mode — not saved')
       onVerdictRecorded(projectId, v)
+      startUndoCountdown(projectId, VERDICT_LABELS[v])
       if (autoAdvance) advanceToNext(v);
       (document.activeElement as HTMLElement)?.blur()
       return
@@ -152,6 +217,7 @@ export function PitchDetailScreen({
     try {
       await submitVerdict(projectId, v)
       onVerdictRecorded(projectId, v)
+      startUndoCountdown(projectId, VERDICT_LABELS[v])
       if (autoAdvance) advanceToNext(v)
     } catch {
       showToast('Failed to submit — try again')
@@ -176,6 +242,15 @@ export function PitchDetailScreen({
     localStorage.setItem(VOICE_KEY, id)
   }
 
+  const handleNoteBlur = () => {
+    if (note.trim()) localStorage.setItem(NOTE_KEY(projectId), note)
+    else localStorage.removeItem(NOTE_KEY(projectId))
+  }
+
+  const filteredVoices = voiceSearch
+    ? voices.filter(v => v.name.toLowerCase().includes(voiceSearch.toLowerCase()))
+    : voices
+
   return (
     <div className="screen" style={{ position: 'relative' }}>
       {/* Hide topbar on desktop when PitchQueue provides navigation */}
@@ -197,7 +272,13 @@ export function PitchDetailScreen({
       {voices.length > 0 && (
         <div className="voice-picker">
           <span className="voice-picker-label">Voice</span>
-          {voices.map(v => (
+          <input
+            className="voice-search"
+            placeholder="Filter…"
+            value={voiceSearch}
+            onChange={e => setVoiceSearch(e.target.value)}
+          />
+          {filteredVoices.map(v => (
             <button
               key={v.id}
               className={`voice-chip${selectedVoice === v.id ? ' voice-chip--active' : ''}`}
@@ -245,6 +326,12 @@ export function PitchDetailScreen({
               <span className="meta-chip">{detail.genre}</span>
             )}
           </div>
+          {detail.comps && (
+            <div className="pitch-comps">
+              <span className="pitch-comps-label">COMPS</span>
+              <span className="pitch-comps-text">{detail.comps}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -252,7 +339,17 @@ export function PitchDetailScreen({
         <div className="scroll-area">
           {loading && <div className="empty-state">Loading pitch…</div>}
           {!loading && detail && (
-            <div className="synopsis">{detail.cleanScript || detail.logline || 'No synopsis available.'}</div>
+            <>
+              <div className="synopsis">{detail.cleanScript || detail.logline || 'No synopsis available.'}</div>
+              <textarea
+                className="pitch-note"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                onBlur={handleNoteBlur}
+                placeholder="Notes…"
+                rows={2}
+              />
+            </>
           )}
         </div>
 
@@ -261,9 +358,19 @@ export function PitchDetailScreen({
           submitting={submitting}
           onSubmit={handleVerdict}
         />
+        {onSkip && (
+          <div className="skip-strip">
+            <button className="skip-btn" onClick={onSkip}>Skip for now</button>
+          </div>
+        )}
       </div>
 
       {toast && <div className="toast">{toast}</div>}
+      {undoPending && (
+        <div className="undo-toast" onClick={handleUndo}>
+          {undoPending.label} — <span className="undo-link">Undo?</span> ({undoPending.countdown}s)
+        </div>
+      )}
     </div>
   )
 }

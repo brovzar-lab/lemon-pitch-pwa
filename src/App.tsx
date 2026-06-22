@@ -6,6 +6,8 @@ import { useSessions } from './store'
 import { HomeScreen } from './screens/HomeScreen'
 import { SessionScreen } from './screens/SessionScreen'
 import { PitchDetailScreen } from './screens/PitchDetailScreen'
+import { CurationScreen } from './screens/CurationScreen'
+import { VaultScreen } from './screens/VaultScreen'
 import { Sidebar } from './components/Sidebar'
 import { PitchQueue } from './components/PitchQueue'
 import { StatsPanel } from './components/StatsPanel'
@@ -16,7 +18,16 @@ export default function App() {
   const [currentPitches, setCurrentPitches] = useState<PitchSummary[]>([])
   const [keyboardAction, setKeyboardAction] = useState<KeyboardAction>(null)
   const [syncing, setSyncing] = useState(false)
-  const { sessions, activeSession, activeSessionId, createSession, recordVerdict } = useSessions()
+  const [skippedIds, setSkippedIds] = useState<Set<string>>(new Set())
+  const [pendingCurationPitches, setPendingCurationPitches] = useState<PitchSummary[]>([])
+  const { sessions, activeSession, activeSessionId, createSession, recordVerdict, renameSession } = useSessions()
+
+  // Clear skippedIds when leaving the pitch screen
+  useEffect(() => {
+    if (screen.name !== 'pitch') {
+      setSkippedIds(new Set())
+    }
+  }, [screen.name])
 
   const handleSync = useCallback(async (): Promise<{ synced: string; pitches: PitchSummary[] } | null> => {
     if (isDemo) return null
@@ -81,6 +92,15 @@ export default function App() {
         case 'r': case 'R':
           setKeyboardAction('reject')
           break
+        case 's': case 'S':
+          setKeyboardAction('skip')
+          break
+        case 'z': case 'Z':
+          if (e.ctrlKey || e.metaKey) {
+            e.preventDefault()
+            setKeyboardAction('undo')
+          }
+          break
         case 'ArrowLeft':
           e.preventDefault()
           setKeyboardAction('prev')
@@ -96,13 +116,24 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [screen.name])
 
+  // Navigate to curate screen before starting a session
   const handleStartSession = (pitches: PitchSummary[]) => {
+    setPendingCurationPitches(pitches)
+    setScreen({ name: 'curate' })
+  }
+
+  const handleCurationConfirm = (pitchIds: string[]) => {
+    const selected = pendingCurationPitches.filter(p => pitchIds.includes(p.projectId))
     const id = createSession(
-      pitches.map(p => p.projectId),
-      pitches.map(p => ({ format: p.format })),
+      selected.map(p => p.projectId),
+      selected.map(p => ({ format: p.format })),
     )
-    setCurrentPitches(pitches)
+    setCurrentPitches(selected)
     setScreen({ name: 'session', sessionId: id })
+  }
+
+  const handleCurationCancel = () => {
+    setScreen({ name: 'home' })
   }
 
   const handleSelectSession = (sessionId: string) => {
@@ -127,6 +158,23 @@ export default function App() {
     }
   }
 
+  const handleSkip = useCallback((skippedProjectId: string) => {
+    const newSkipped = new Set([...skippedIds, skippedProjectId])
+    setSkippedIds(newSkipped)
+
+    if (screen.name !== 'pitch') return
+    const session = sessions.find(s => s.id === (screen as { sessionId: string }).sessionId)
+    const pitchIds = session?.pitchIds ?? []
+    const nextId = pitchIds.find(id =>
+      id !== skippedProjectId &&
+      !newSkipped.has(id) &&
+      !(session?.verdicts[id])
+    )
+    if (nextId) {
+      setScreen({ name: 'pitch', sessionId: (screen as { sessionId: string }).sessionId, projectId: nextId })
+    }
+  }, [skippedIds, screen, sessions])
+
   const isPitchScreen  = screen.name === 'pitch'
   const showStatsPanel = screen.name === 'pitch' || screen.name === 'session'
 
@@ -140,6 +188,7 @@ export default function App() {
           pitches={pitchesForPanels}
           currentProjectId={screen.name === 'pitch' ? screen.projectId : null}
           session={currentSession}
+          skippedIds={skippedIds}
           onSelectPitch={handleNavigatePitch}
           onBackToSessions={() => {
             if (screen.name === 'pitch') setScreen({ name: 'session', sessionId: screen.sessionId })
@@ -154,6 +203,8 @@ export default function App() {
           onStartSession={handleStartSession}
           isHome={screen.name === 'home'}
           onRefresh={handleSync}
+          onVaultOpen={() => setScreen({ name: 'vault' })}
+          onRenameSession={renameSession}
           syncing={syncing}
         />
       )}
@@ -194,10 +245,25 @@ export default function App() {
             }}
             onVerdictRecorded={handleVerdictRecorded}
             onNavigatePitch={handleNavigatePitch}
+            onSkip={() => {
+              if (screen.name === 'pitch') handleSkip(screen.projectId)
+            }}
             pendingKeyboardAction={keyboardAction}
             onKeyboardActionHandled={() => setKeyboardAction(null)}
             isDesktopCenter={true}
           />
+        )}
+
+        {screen.name === 'curate' && (
+          <CurationScreen
+            pitches={pendingCurationPitches}
+            onStart={handleCurationConfirm}
+            onCancel={handleCurationCancel}
+          />
+        )}
+
+        {screen.name === 'vault' && (
+          <VaultScreen onBack={() => setScreen({ name: 'home' })} />
         )}
       </div>
 

@@ -5,6 +5,7 @@ interface Props {
   pitches: PitchSummary[]
   currentProjectId: string | null
   session: Session | null
+  skippedIds?: Set<string>
   onSelectPitch: (projectId: string) => void
   onBackToSessions: () => void
 }
@@ -29,14 +30,18 @@ function formatLabel(format: string): string {
   return format
 }
 
-export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, onBackToSessions }: Props) {
+export function PitchQueue({ pitches, currentProjectId, session, skippedIds, onSelectPitch, onBackToSessions }: Props) {
   const [formatFilter, setFormatFilter] = useState<string>('ALL')
   const [genreFilter, setGenreFilter] = useState<string>('ALL')
 
   const sorted = [...pitches].sort((a, b) => {
     const aVerdicted = !!(session?.verdicts[a.projectId] ?? a.verdictStatus)
     const bVerdicted = !!(session?.verdicts[b.projectId] ?? b.verdictStatus)
+    const aSkipped = skippedIds?.has(a.projectId) ?? false
+    const bSkipped = skippedIds?.has(b.projectId) ?? false
+    // Verdicted last, then skipped, then pending by pitchNumber
     if (aVerdicted !== bVerdicted) return aVerdicted ? 1 : -1
+    if (!aVerdicted && !bVerdicted && aSkipped !== bSkipped) return aSkipped ? 1 : -1
     return a.pitchNumber - b.pitchNumber
   })
 
@@ -100,16 +105,19 @@ export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, 
         {filtered.map(p => {
           const verdict = session?.verdicts[p.projectId] ?? p.verdictStatus
           const isActive = p.projectId === currentProjectId
+          const isSkipped = skippedIds?.has(p.projectId) ?? false
           return (
             <div
               key={p.projectId}
-              className={`pitch-queue-row${isActive ? ' active' : ''}`}
+              className={`pitch-queue-row${isActive ? ' active' : ''}${isSkipped ? ' skipped' : ''}`}
               onClick={() => onSelectPitch(p.projectId)}
             >
               <span className="pitch-queue-num">{p.pitchNumber}</span>
               <div className="pitch-queue-info">
                 <div className="pitch-queue-title">{p.title}</div>
-                <div className="pitch-queue-format">{p.format}</div>
+                <div className="pitch-queue-format">
+                  {p.format}{isSkipped ? ' · SKIP' : ''}
+                </div>
               </div>
               <span className={`pill ${verdictClass(verdict)}`}>{verdictLabel(verdict)}</span>
             </div>

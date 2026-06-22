@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { PitchSummary, Session, VerdictStatus } from '../types'
 
 interface Props {
@@ -20,6 +21,7 @@ function verdictLabel(v: VerdictStatus | undefined): string {
 }
 
 export function StatsPanel({ session, pitches }: Props) {
+  const [exportToast, setExportToast] = useState('')
   const verdicts = session?.verdicts ?? {}
 
   const approved = pitches.filter(p => (verdicts[p.projectId] ?? p.verdictStatus) === 'approve').length
@@ -33,6 +35,38 @@ export function StatsPanel({ session, pitches }: Props) {
     .filter(p => !!(verdicts[p.projectId] ?? p.verdictStatus))
     .slice(-10)
     .reverse()
+
+  const handleExport = () => {
+    const sessionName = session?.name ?? 'Session'
+    const date = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+    const byVerdict = (v: string) => pitches.filter(p => (verdicts[p.projectId] ?? p.verdictStatus) === v)
+    const pendingPitches = pitches.filter(p => !(verdicts[p.projectId] ?? p.verdictStatus))
+
+    const lines: string[] = [
+      `# Session Summary — ${sessionName} · ${date}`,
+      '',
+      `## Approved (${byVerdict('approve').length})`,
+      ...byVerdict('approve').map(p => `- **${p.title}**`),
+      '',
+      `## Vaulted (${byVerdict('vault').length})`,
+      ...byVerdict('vault').map(p => `- **${p.title}**`),
+      '',
+      `## Rejected (${byVerdict('reject').length})`,
+      ...byVerdict('reject').map(p => `- ${p.title}`),
+      '',
+      `## Pending (${pendingPitches.length})`,
+      ...pendingPitches.map(p => `- ${p.title}`),
+    ]
+
+    navigator.clipboard.writeText(lines.join('\n')).then(() => {
+      setExportToast('Copied to clipboard')
+      setTimeout(() => setExportToast(''), 2500)
+    }).catch(() => {
+      setExportToast('Copy failed')
+      setTimeout(() => setExportToast(''), 2500)
+    })
+  }
 
   return (
     <div className="stats-panel">
@@ -81,14 +115,24 @@ export function StatsPanel({ session, pitches }: Props) {
           )}
           {decidedPitches.map(p => {
             const v = verdicts[p.projectId] ?? p.verdictStatus
+            const note = localStorage.getItem(`pitch-note-${p.projectId}`)
             return (
               <div key={p.projectId} className="decision-history-row">
-                <span className="decision-history-title">{p.title}</span>
+                <div className="decision-history-info">
+                  <span className="decision-history-title">{p.title}</span>
+                  {note && (
+                    <div className="decision-history-note">
+                      {note.length > 50 ? note.slice(0, 50) + '…' : note}
+                    </div>
+                  )}
+                </div>
                 <span className={`pill ${verdictClass(v)}`}>{verdictLabel(v)}</span>
               </div>
             )
           })}
         </div>
+        <button className="export-btn" onClick={handleExport}>Export Summary</button>
+        {exportToast && <div className="export-toast">{exportToast}</div>}
       </div>
 
       <div className="kbd-shortcuts">

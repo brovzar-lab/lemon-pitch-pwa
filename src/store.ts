@@ -78,7 +78,17 @@ export function useSessions() {
     })
   }, [])
 
+  const renameSession = useCallback((sessionId: string, name: string) => {
+    const trimmed = name.trim()
+    if (!trimmed) return
+    setSessions(prev => {
+      const updated = prev.map(s => s.id === sessionId ? { ...s, name: trimmed } : s)
+      saveSessions(updated)
+      return updated
+    })
+  }, [])
+
   const activeSession = sessions.find(s => s.id === activeSessionId) ?? null
 
-  return { sessions, activeSession, activeSessionId, createSession, recordVerdict, setActiveSessionId }
+  return { sessions, activeSession, activeSessionId, createSession, recordVerdict, renameSession, setActiveSessionId }
 }

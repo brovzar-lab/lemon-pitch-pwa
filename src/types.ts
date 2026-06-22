@@ -16,6 +16,7 @@ export interface PitchDetail extends PitchSummary {
   logline: string
   platform: string
   genre: string
+  comps?: string
 }
 
 export interface Session {
@@ -53,3 +54,5 @@ export type Screen =
   | { name: 'home' }
   | { name: 'session'; sessionId: string }
   | { name: 'pitch'; sessionId: string; projectId: string }
+  | { name: 'curate' }
+  | { name: 'vault' }

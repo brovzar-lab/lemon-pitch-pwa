@@ -2492,3 +2492,435 @@ body::before {
     display: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   V2 FEATURES
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─── Feature 1: Comp titles ────────────────────────────────────── */
+
+.pitch-comps {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  margin-top: 6px;
+  padding-left: 10px;
+}
+
+.pitch-comps-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.pitch-comps-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-style: italic;
+  color: var(--text-2);
+}
+
+/* ─── Feature 2: Undo toast ─────────────────────────────────────── */
+
+.undo-toast {
+  position: fixed;
+  bottom: calc(var(--safe-bottom) + 150px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg5);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  padding: 10px 22px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  z-index: 201;
+  white-space: nowrap;
+  cursor: pointer;
+  animation: toast-in 0.2s ease;
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
+.undo-link {
+  color: var(--accent);
+}
+
+/* ─── Feature 3: Skip button ────────────────────────────────────── */
+
+.skip-strip {
+  display: flex;
+  justify-content: center;
+  padding: 6px 16px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.skip-btn {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 4px 16px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.skip-btn:hover {
+  border-color: var(--accent);
+  color: var(--text-2);
+}
+
+.pitch-queue-row.skipped {
+  opacity: 0.4;
+}
+
+/* ─── Feature 4: Notes textarea ─────────────────────────────────── */
+
+.pitch-note {
+  width: calc(100% - 36px);
+  margin: 0 18px 12px;
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 8px;
+  resize: vertical;
+  min-height: 52px;
+  line-height: 1.5;
+}
+
+.pitch-note:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.pitch-note::placeholder {
+  color: var(--text-muted);
+}
+
+/* ─── Decision history note excerpt ─────────────────────────────── */
+
+.decision-history-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.decision-history-note {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-style: italic;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+/* ─── Feature 5: Export button ──────────────────────────────────── */
+
+.export-btn {
+  width: 100%;
+  margin-top: 10px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.export-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent-mid);
+}
+
+.export-toast {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--green);
+  text-align: center;
+  padding: 4px 0 0;
+  letter-spacing: 0.06em;
+}
+
+/* ─── Feature 6: Curation screen ────────────────────────────────── */
+
+.curation-screen {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg);
+}
+
+.curation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border-hi);
+  flex-shrink: 0;
+}
+
+.curation-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.curation-cancel {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: color 0.12s, border-color 0.12s;
+}
+
+.curation-cancel:hover {
+  color: var(--text-2);
+  border-color: var(--text-2);
+}
+
+.curation-hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  padding: 10px 20px 6px;
+  letter-spacing: 0.04em;
+}
+
+.curation-body {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.curation-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.curation-table th {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 6px 20px;
+  text-align: left;
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+}
+
+.curation-row td {
+  padding: 9px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.10s;
+}
+
+.curation-row:hover td {
+  background: var(--accent-glow);
+}
+
+.curation-row.skipped td {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+.curation-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  width: 36px;
+}
+
+.curation-title-cell {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.curation-format {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  width: 70px;
+}
+
+.curation-genre {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  width: 110px;
+}
+
+.curation-footer {
+  padding: 12px 20px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.curation-cta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 14px 24px;
+  background: var(--accent);
+  color: #000;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  transition: box-shadow 0.2s;
+}
+
+.curation-cta:hover:not(:disabled) {
+  box-shadow: 0 0 24px var(--accent-glow-lg);
+}
+
+.curation-cta:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ─── Feature 7: Vault screen + Sidebar button ──────────────────── */
+
+.sidebar-vault {
+  padding: 6px 12px 2px;
+  flex-shrink: 0;
+}
+
+.sidebar-vault-btn {
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  background: var(--vault-bg);
+  border: 1px solid var(--vault-bdr);
+  color: var(--vault);
+  padding: 5px 10px;
+  cursor: pointer;
+  transition: background 0.12s, box-shadow 0.12s;
+}
+
+.sidebar-vault-btn:hover {
+  background: rgba(255,159,10,0.18);
+  box-shadow: 0 0 8px rgba(255,159,10,0.2);
+}
+
+.vault-screen {
+  background: var(--bg);
+}
+
+.vault-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.vault-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  min-width: 26px;
+  flex-shrink: 0;
+}
+
+.vault-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.vault-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.vault-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* ─── Feature 9: Session name editable ──────────────────────────── */
+
+.sidebar-session-name[contenteditable] {
+  outline: none;
+  cursor: text;
+  border-radius: 0;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.sidebar-session-name[contenteditable]:focus {
+  border-bottom-color: var(--accent);
+}
+
+/* ─── Feature 10: Voice search ──────────────────────────────────── */
+
+.voice-search {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 8px;
+  width: 100px;
+  flex-shrink: 0;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.voice-search:focus {
+  border-color: var(--accent);
+}
+
+.voice-search::placeholder {
+  color: var(--text-muted);
+}
