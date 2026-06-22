@@ -30,6 +30,18 @@ export async function fetchStats(): Promise<BackendStats> {
   return res.json() as Promise<BackendStats>
 }
 
+export async function fetchRoster(): Promise<PitchSummary[]> {
+  const res = await fetch(`${API_BASE}/pitches/roster`)
+  if (!res.ok) throw new Error(`Roster fetch failed: ${res.status}`)
+  return res.json() as Promise<PitchSummary[]>
+}
+
+export async function triggerRefresh(): Promise<{ synced: string; pitches: PitchSummary[] }> {
+  const res = await fetch(`${API_BASE}/refresh`, { method: 'POST' })
+  if (!res.ok) throw new Error(`Refresh failed: ${res.status}`)
+  return res.json()
+}
+
 export function audioUrl(projectId: string, voiceId?: string): string {
   const base = `${API_BASE}/pitches/${projectId}/audio`
   return voiceId ? `${base}?voice=${encodeURIComponent(voiceId)}` : base

@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { Screen, PitchSummary, Session, VerdictStatus } from './types'
 import type { KeyboardAction } from './screens/PitchDetailScreen'
-import { isDemo } from './api'
+import { isDemo, triggerRefresh } from './api'
 import { useSessions } from './store'
 import { HomeScreen } from './screens/HomeScreen'
 import { SessionScreen } from './screens/SessionScreen'
@@ -15,7 +15,20 @@ export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
   const [currentPitches, setCurrentPitches] = useState<PitchSummary[]>([])
   const [keyboardAction, setKeyboardAction] = useState<KeyboardAction>(null)
+  const [syncing, setSyncing] = useState(false)
   const { sessions, activeSession, activeSessionId, createSession, recordVerdict } = useSessions()
+
+  const handleSync = useCallback(async (): Promise<{ synced: string; pitches: PitchSummary[] } | null> => {
+    if (isDemo) return null
+    setSyncing(true)
+    try {
+      return await triggerRefresh()
+    } catch {
+      return null
+    } finally {
+      setSyncing(false)
+    }
+  }, [])
 
   const currentSessionId = screen.name === 'session' ? screen.sessionId
     : screen.name === 'pitch' ? screen.sessionId
@@ -140,6 +153,8 @@ export default function App() {
           onSelectSession={handleSelectSession}
           onStartSession={handleStartSession}
           isHome={screen.name === 'home'}
+          onRefresh={handleSync}
+          syncing={syncing}
         />
       )}
 
@@ -151,6 +166,8 @@ export default function App() {
             activeSessionId={activeSessionId}
             onSelectSession={handleSelectSession}
             onStartSession={handleStartSession}
+            syncing={syncing}
+            onSync={handleSync}
           />
         )}
 

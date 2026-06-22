@@ -10,6 +10,8 @@ interface Props {
   isHome: boolean
   onSelectSession: (id: string) => void
   onStartSession: (pitches: PitchSummary[]) => void
+  onRefresh: () => void
+  syncing: boolean
 }
 
 function computeStats(sessions: Session[]): AllTimeStats {
@@ -36,6 +38,8 @@ export function Sidebar({
   isHome,
   onSelectSession,
   onStartSession,
+  onRefresh,
+  syncing,
 }: Props) {
   const [pitches, setPitches] = useState<PitchSummary[]>([])
   const [loading, setLoading] = useState(!isDemo)
@@ -148,6 +152,13 @@ export function Sidebar({
       <div className="system-status">
         <div className="status-dot" />
         <span className="status-text">System Online</span>
+      </div>
+
+      {/* Dev Gate sync */}
+      <div className="sidebar-refresh">
+        <button className="sidebar-refresh-btn" onClick={onRefresh} disabled={syncing}>
+          {syncing ? '↻ Syncing…' : '↻ Sync Dev Gate'}
+        </button>
       </div>
 
       {/* CTA */}
