@@ -1689,3 +1689,425 @@ body::before {
     color: var(--text-muted);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   PITCH QUEUE — Left panel (desktop ≥1024px, pitch screen)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pitch-queue {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .pitch-queue {
+    display: flex;
+    flex-direction: column;
+    width: 260px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border-hi);
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Vertical scan line */
+  .pitch-queue::after {
+    content: '';
+    position: absolute;
+    right: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(180deg, transparent 0%, var(--accent) 40%, var(--accent) 60%, transparent 100%);
+    opacity: 0.20;
+    animation: sidebar-pulse 4s ease-in-out infinite;
+  }
+
+  .pitch-queue-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 12px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .pitch-queue-back {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 22px;
+    cursor: pointer;
+    padding: 2px 6px 2px 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: text-shadow 0.2s;
+  }
+
+  .pitch-queue-back:hover {
+    text-shadow: 0 0 12px var(--accent);
+  }
+
+  .pitch-queue-session-name {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pitch-queue-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .pitch-queue-list::-webkit-scrollbar { display: none; }
+
+  .pitch-queue-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    transition: background 0.12s, border-left-color 0.12s;
+  }
+
+  .pitch-queue-row:hover {
+    background: var(--accent-glow);
+    border-left-color: var(--accent);
+  }
+
+  .pitch-queue-row.active {
+    background: var(--accent-dim);
+    border-left-color: var(--accent);
+    box-shadow: inset 0 0 20px rgba(0,170,255,0.06);
+  }
+
+  .pitch-queue-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--text-muted);
+    min-width: 20px;
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .pitch-queue-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .pitch-queue-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 1px;
+  }
+
+  .pitch-queue-format {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.10em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .pitch-queue-empty {
+    padding: 24px 12px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .pitch-queue-footer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+
+  .pitch-queue-footer-sep {
+    opacity: 0.4;
+  }
+
+  .pitch-queue-footer-pending {
+    color: var(--accent);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   STATS PANEL — Right panel (desktop ≥1024px, pitch/session screens)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.stats-panel {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .stats-panel {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-left: 1px solid var(--border-hi);
+    overflow: hidden;
+  }
+
+  .stats-panel-header {
+    padding: 16px 14px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .stats-panel-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .stats-panel-section {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .stats-panel-section-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .stats-panel-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+  }
+
+  .stats-panel-stat {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 8px 10px 7px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stats-panel-stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stats-panel-stat.approved::before { background: var(--green); }
+  .stats-panel-stat.vaulted::before  { background: var(--vault); }
+  .stats-panel-stat.rejected::before { background: var(--red); }
+  .stats-panel-stat.pending-stat::before { background: var(--text-muted); }
+
+  .stats-panel-stat-num {
+    font-family: var(--font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 3px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stats-panel-stat.approved .stats-panel-stat-num { color: var(--green); }
+  .stats-panel-stat.vaulted .stats-panel-stat-num  { color: var(--vault); }
+  .stats-panel-stat.rejected .stats-panel-stat-num { color: var(--red); }
+  .stats-panel-stat.pending-stat .stats-panel-stat-num { color: var(--text-muted); }
+
+  .stats-panel-stat-key {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .stats-panel-rate-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .stats-panel-rate-pct {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .approval-bar {
+    height: 4px;
+    background: var(--border);
+    overflow: hidden;
+    border-radius: 0;
+    margin-bottom: 6px;
+  }
+
+  .approval-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-mid), var(--green));
+    box-shadow: 0 0 8px rgba(0,230,122,0.4);
+    transition: width 0.4s ease;
+  }
+
+  .stats-panel-rate-sub {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .stats-panel-history {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .decision-history-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  .decision-history-list::-webkit-scrollbar { display: none; }
+
+  .decision-history-empty {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 8px 0;
+    opacity: 0.6;
+  }
+
+  .decision-history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .decision-history-row:last-child {
+    border-bottom: none;
+  }
+
+  .decision-history-title {
+    font-size: 11px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .kbd-shortcuts {
+    padding: 12px 14px;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+    background: var(--bg2);
+  }
+
+  .kbd-shortcut {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  .kbd-shortcut kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    padding: 2px 6px;
+    background: var(--bg4);
+    border: 1px solid var(--border-hi);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border-radius: 0;
+    flex-shrink: 0;
+  }
+
+  .kbd-shortcut span {
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PITCH DETAIL — Logline + meta chips (desktop enhancements)
+   ═══════════════════════════════════════════════════════════════════ */
+
+.pitch-detail-logline {
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin-bottom: 8px;
+  padding-left: 10px;
+}
+
+.meta-chip {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+/* On desktop, hide the topbar-driven position counter since PitchQueue handles it */
+@media (min-width: 1024px) {
+  .pitch-queue ~ .main-panel .screen .topbar {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { audioUrl, isDemo } from '../api'
 
 const SPEEDS = [1, 1.25, 1.5, 2, 0.75] as const
@@ -26,7 +26,14 @@ interface Props {
   autoPlay?: boolean
 }
 
-export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
+export interface AudioPlayerHandle {
+  togglePlay: () => void
+}
+
+export const AudioPlayer = forwardRef<AudioPlayerHandle, Props>(function AudioPlayer(
+  { projectId, voiceId, autoPlay = true }: Props,
+  ref,
+) {
   const audioRef   = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying]         = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
@@ -98,6 +105,8 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
     if (playing) audio.pause()
     else audio.play().catch(() => {})
   }
+
+  useImperativeHandle(ref, () => ({ togglePlay }), [playing])
 
   const skip = (delta: number) => {
     const audio = audioRef.current
@@ -220,4 +229,4 @@ export function AudioPlayer({ projectId, voiceId, autoPlay = true }: Props) {
       </div>
     </div>
   )
-}
+})

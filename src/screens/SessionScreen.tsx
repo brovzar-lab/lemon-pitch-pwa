@@ -10,6 +10,7 @@ interface Props {
   sessions: Session[]
   onBack: () => void
   onSelectPitch: (projectId: string) => void
+  onPitchesLoaded?: (pitches: PitchSummary[]) => void
 }
 
 function verdictClass(v: string | null | undefined): string {
@@ -26,7 +27,7 @@ function verdictLabel(v: string | null | undefined): string {
   return 'Pending'
 }
 
-export function SessionScreen({ sessionId, sessions, onBack, onSelectPitch }: Props) {
+export function SessionScreen({ sessionId, sessions, onBack, onSelectPitch, onPitchesLoaded }: Props) {
   const [pitches, setPitches] = useState<PitchSummary[]>([])
   const [filter, setFilter] = useState<FilterTab>('all')
 
@@ -37,6 +38,7 @@ export function SessionScreen({ sessionId, sessions, onBack, onSelectPitch }: Pr
   useEffect(() => {
     if (isDemo) {
       setPitches(DEMO_PITCHES)
+      onPitchesLoaded?.(DEMO_PITCHES)
       return
     }
     if (!session) return
@@ -44,9 +46,10 @@ export function SessionScreen({ sessionId, sessions, onBack, onSelectPitch }: Pr
       .then(all => {
         const inSession = all.filter(p => session.pitchIds.includes(p.projectId))
         setPitches(inSession)
+        onPitchesLoaded?.(inSession)
       })
       .catch(() => {})
-  }, [sessionId, session])
+  }, [sessionId, session]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!session) {
     return (

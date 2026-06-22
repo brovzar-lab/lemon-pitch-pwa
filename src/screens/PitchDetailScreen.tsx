@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
-import type { PitchDetail, Session, VerdictStatus } from '../types'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { PitchDetail, PitchSummary, Session, VerdictStatus } from '../types'
 import type { Voice } from '../types'
+import type { AudioPlayerHandle } from '../components/AudioPlayer'
 import { fetchPitchDetail, fetchVoices, submitVerdict, audioUrl, isDemo } from '../api'
 import { DEMO_PITCHES, DEMO_PITCH_DETAILS, DEMO_VOICES } from '../demo'
 import { AudioPlayer } from '../components/AudioPlayer'
@@ -8,22 +9,32 @@ import { VerdictStrip } from '../components/VerdictStrip'
 
 const VOICE_KEY = 'lemon_voice'
 
+export type KeyboardAction = 'play' | 'approve' | 'vault' | 'reject' | 'prev' | 'next' | null
+
 interface Props {
   projectId: string
   sessionId: string
   sessions: Session[]
+  pitches?: PitchSummary[]
   onBack: () => void
   onVerdictRecorded: (projectId: string, verdict: VerdictStatus) => void
   onNavigatePitch: (projectId: string) => void
+  pendingKeyboardAction?: KeyboardAction
+  onKeyboardActionHandled?: () => void
+  isDesktopCenter?: boolean
 }
 
 export function PitchDetailScreen({
   projectId,
   sessionId,
   sessions,
+  pitches: _pitches,
   onBack,
   onVerdictRecorded,
   onNavigatePitch,
+  pendingKeyboardAction,
+  onKeyboardActionHandled,
+  isDesktopCenter = false,
 }: Props) {
   const [detail, setDetail] = useState<PitchDetail | null>(null)
   const [loading, setLoading] = useState(true)
@@ -32,6 +43,7 @@ export function PitchDetailScreen({
   const [autoAdvance, setAutoAdvance] = useState(true)
   const [voices, setVoices] = useState<Voice[]>([])
   const [selectedVoice, setSelectedVoice] = useState<string>(() => localStorage.getItem(VOICE_KEY) ?? '')
+  const audioRef = useRef<AudioPlayerHandle>(null)
 
   const session = sessions.find(s => s.id === sessionId)
   const sessionPitchIds = isDemo ? DEMO_PITCHES.map(p => p.projectId) : (session?.pitchIds ?? [])
@@ -57,7 +69,6 @@ export function PitchDetailScreen({
     fetchVoices()
       .then(v => {
         setVoices(v)
-        // Auto-select first voice if none stored
         if (!localStorage.getItem(VOICE_KEY) && v.length > 0) {
           setSelectedVoice(v[0].id)
           localStorage.setItem(VOICE_KEY, v[0].id)
@@ -89,6 +100,40 @@ export function PitchDetailScreen({
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [projectId])
+
+  // Handle keyboard actions
+  useEffect(() => {
+    if (!pendingKeyboardAction) return
+
+    const handleAction = async () => {
+      switch (pendingKeyboardAction) {
+        case 'play':
+          audioRef.current?.togglePlay()
+          break
+        case 'approve':
+          await handleVerdict('approve')
+          break
+        case 'vault':
+          await handleVerdict('vault')
+          break
+        case 'reject':
+          await handleVerdict('reject')
+          break
+        case 'prev': {
+          const prevId = sessionPitchIds[posIndex - 1] ?? null
+          if (prevId) onNavigatePitch(prevId)
+          break
+        }
+        case 'next': {
+          const nextId = sessionPitchIds[posIndex + 1] ?? null
+          if (nextId) onNavigatePitch(nextId)
+          break
+        }
+      }
+    }
+
+    handleAction().finally(() => onKeyboardActionHandled?.())
+  }, [pendingKeyboardAction]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -132,17 +177,20 @@ export function PitchDetailScreen({
 
   return (
     <div className="screen" style={{ position: 'relative' }}>
-      <div className="topbar">
-        <button className="back-btn" onClick={onBack}>‹</button>
-        <span className="topbar-title" style={{ fontSize: 13 }}>
-          {loading ? 'Loading…' : (detail?.title ?? 'Pitch')}
-        </span>
-        {total > 0 && (
-          <span className="pitch-position">{position} / {total}</span>
-        )}
-      </div>
+      {/* Hide topbar on desktop when PitchQueue provides navigation */}
+      {!isDesktopCenter && (
+        <div className="topbar">
+          <button className="back-btn" onClick={onBack}>‹</button>
+          <span className="topbar-title" style={{ fontSize: 13 }}>
+            {loading ? 'Loading…' : (detail?.title ?? 'Pitch')}
+          </span>
+          {total > 0 && (
+            <span className="pitch-position">{position} / {total}</span>
+          )}
+        </div>
+      )}
 
-      <AudioPlayer projectId={projectId} voiceId={selectedVoice || undefined} autoPlay />
+      <AudioPlayer ref={audioRef} projectId={projectId} voiceId={selectedVoice || undefined} autoPlay />
 
       {/* Voice picker */}
       {voices.length > 0 && (
@@ -182,15 +230,18 @@ export function PitchDetailScreen({
       {!loading && detail && (
         <div className="pitch-detail-header">
           <div className="pitch-detail-title">{detail.title}</div>
+          {detail.logline && (
+            <p className="pitch-detail-logline">{detail.logline}</p>
+          )}
           <div className="pitch-detail-meta">
             <span className="pill" style={{ background: 'var(--bg3)', color: 'var(--text-muted)' }}>
               {detail.format}
             </span>
             {detail.platform && (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{detail.platform}</span>
+              <span className="meta-chip">{detail.platform}</span>
             )}
             {detail.genre && (
-              <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{detail.genre}</span>
+              <span className="meta-chip">{detail.genre}</span>
             )}
           </div>
         </div>
