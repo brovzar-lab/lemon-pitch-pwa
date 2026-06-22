@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { PitchSummary, Session, VerdictStatus } from '../types'
 
 interface Props {
@@ -22,7 +23,16 @@ function verdictLabel(v: VerdictStatus | undefined): string {
   return '—'
 }
 
+function formatLabel(format: string): string {
+  if (format === 'FILM') return 'Film'
+  if (format === 'SERIES') return 'TV Show'
+  return format
+}
+
 export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, onBackToSessions }: Props) {
+  const [formatFilter, setFormatFilter] = useState<string>('ALL')
+  const [genreFilter, setGenreFilter] = useState<string>('ALL')
+
   const sorted = [...pitches].sort((a, b) => {
     const aVerdicted = !!(session?.verdicts[a.projectId] ?? a.verdictStatus)
     const bVerdicted = !!(session?.verdicts[b.projectId] ?? b.verdictStatus)
@@ -30,9 +40,17 @@ export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, 
     return a.pitchNumber - b.pitchNumber
   })
 
-  const total = pitches.length
-  const pending = pitches.filter(p => !(session?.verdicts[p.projectId] ?? p.verdictStatus)).length
-  const done = total - pending
+  const formats = ['ALL', ...Array.from(new Set(sorted.map(p => p.format).filter((f): f is string => !!f))).sort()]
+  const genres = ['ALL', ...Array.from(new Set(sorted.map(p => p.genre).filter((g): g is string => !!g))).sort()]
+  const hasGenres = genres.length > 1
+
+  const filtered = sorted.filter(p => {
+    if (formatFilter !== 'ALL' && p.format !== formatFilter) return false
+    if (genreFilter !== 'ALL' && p.genre !== genreFilter) return false
+    return true
+  })
+
+  const pending = filtered.filter(p => !(session?.verdicts[p.projectId] ?? p.verdictStatus)).length
 
   return (
     <div className="pitch-queue">
@@ -41,8 +59,45 @@ export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, 
         <div className="pitch-queue-session-name">{session?.name ?? 'Session'}</div>
       </div>
 
+      <div className="pitch-queue-filters">
+        <div className="pitch-queue-filter-row">
+          {formats.map(fmt => {
+            const count = fmt === 'ALL'
+              ? sorted.filter(p => genreFilter === 'ALL' || p.genre === genreFilter).length
+              : sorted.filter(p => p.format === fmt && (genreFilter === 'ALL' || p.genre === genreFilter)).length
+            return (
+              <button
+                key={fmt}
+                className={`pitch-queue-chip${formatFilter === fmt ? ' active' : ''}`}
+                onClick={() => setFormatFilter(fmt)}
+              >
+                {fmt === 'ALL' ? 'All' : formatLabel(fmt)} ({count})
+              </button>
+            )
+          })}
+        </div>
+        {hasGenres && (
+          <div className="pitch-queue-filter-row">
+            {genres.map(genre => {
+              const count = genre === 'ALL'
+                ? sorted.filter(p => formatFilter === 'ALL' || p.format === formatFilter).length
+                : sorted.filter(p => p.genre === genre && (formatFilter === 'ALL' || p.format === formatFilter)).length
+              return (
+                <button
+                  key={genre}
+                  className={`pitch-queue-chip${genreFilter === genre ? ' active' : ''}`}
+                  onClick={() => setGenreFilter(genre)}
+                >
+                  {genre === 'ALL' ? 'All' : genre} ({count})
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       <div className="pitch-queue-list">
-        {sorted.map(p => {
+        {filtered.map(p => {
           const verdict = session?.verdicts[p.projectId] ?? p.verdictStatus
           const isActive = p.projectId === currentProjectId
           return (
@@ -60,17 +115,15 @@ export function PitchQueue({ pitches, currentProjectId, session, onSelectPitch, 
             </div>
           )
         })}
-        {pitches.length === 0 && (
+        {filtered.length === 0 && (
           <div className="pitch-queue-empty">No pitches</div>
         )}
       </div>
 
       <div className="pitch-queue-footer">
-        <span>{total} total</span>
+        <span>{filtered.length} shown</span>
         <span className="pitch-queue-footer-sep">·</span>
         <span className="pitch-queue-footer-pending">{pending} pending</span>
-        <span className="pitch-queue-footer-sep">·</span>
-        <span>{done} done</span>
       </div>
     </div>
   )

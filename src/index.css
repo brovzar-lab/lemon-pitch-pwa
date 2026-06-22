@@ -2099,6 +2099,47 @@ body::before {
     min-width: 0;
   }
 
+  .pitch-queue-filters {
+    padding: 8px 12px 6px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .pitch-queue-filter-row {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .pitch-queue-chip {
+    padding: 2px 8px;
+    background: var(--bg4);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+    white-space: nowrap;
+  }
+
+  .pitch-queue-chip:hover {
+    border-color: var(--accent);
+    color: var(--text-2);
+  }
+
+  .pitch-queue-chip.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
   .pitch-queue-list {
     flex: 1;
     overflow-y: auto;

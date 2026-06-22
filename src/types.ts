@@ -4,6 +4,7 @@ export interface PitchSummary {
   pitchNumber: number
   title: string
   format: string
+  genre?: string
   projectId: string
   hasSpeech: boolean
   verdictStatus: VerdictStatus
