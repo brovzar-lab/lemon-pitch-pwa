@@ -49,7 +49,7 @@ export function StatsPanel({ session, pitches }: Props) {
       `## Approved (${byVerdict('approve').length})`,
       ...byVerdict('approve').map(p => `- **${p.title}**`),
       '',
-      `## Vaulted (${byVerdict('vault').length})`,
+      `## Vault (${byVerdict('vault').length})`,
       ...byVerdict('vault').map(p => `- **${p.title}**`),
       '',
       `## Rejected (${byVerdict('reject').length})`,

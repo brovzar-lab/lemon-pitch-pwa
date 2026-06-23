@@ -10,6 +10,16 @@ const STAGE_CLASS: Record<string, string> = {
   vaulted:     'stage-vaulted',
 }
 
+const STAGE_LABEL: Record<string, string> = {
+  development: 'Approved',
+  killed:      'Rejected',
+  vaulted:     'Vault',
+  packaging:   'Packaging',
+  greenlit:    'Greenlit',
+  intake:      'Intake',
+  evaluation:  'Evaluation',
+}
+
 interface Props {
   roster:         PitchSummary[]
   loading:        boolean
@@ -64,7 +74,7 @@ export function PitchRoster({ roster, loading, formatFilter, onFilterChange, sea
               <span className="roster-num">{p.pitchNumber}</span>
               <span className="roster-title">{p.title}</span>
               <span className="roster-format">{p.format}</span>
-              <span className={`roster-stage ${STAGE_CLASS[stage] ?? 'stage-pitch'}`}>{stage}</span>
+              <span className={`roster-stage ${STAGE_CLASS[stage] ?? 'stage-pitch'}`}>{STAGE_LABEL[stage] ?? stage}</span>
               <span className="roster-audio">{p.hasSpeech ? <span className="audio-ready">♪</span> : null}</span>
               <span className="roster-verdict">
                 {p.verdictStatus === 'approve' && <span className="pill approved">✓</span>}

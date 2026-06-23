@@ -109,7 +109,7 @@ export function HomeScreen({ sessions, onSelectSession, onStartSession, activeSe
 
   const pillForVerdict = (v: string) => {
     if (v === 'approve') return <span key={v} className="pill approved">Approved</span>
-    if (v === 'vault')   return <span key={v} className="pill vaulted">Vaulted</span>
+    if (v === 'vault')   return <span key={v} className="pill vaulted">Vault</span>
     if (v === 'reject')  return <span key={v} className="pill rejected">Rejected</span>
     return null
   }
@@ -121,7 +121,7 @@ export function HomeScreen({ sessions, onSelectSession, onStartSession, activeSe
     const pe = s.pitchIds.length - Object.keys(s.verdicts).length
     const pills: JSX.Element[] = []
     if (ap > 0) pills.push(<span key="a" className="pill approved">{ap} approved</span>)
-    if (vt > 0) pills.push(<span key="v" className="pill vaulted">{vt} vaulted</span>)
+    if (vt > 0) pills.push(<span key="v" className="pill vaulted">{vt} vault</span>)
     if (rj > 0) pills.push(<span key="r" className="pill rejected">{rj} rejected</span>)
     if (pe > 0) pills.push(<span key="p" className="pill pending">{pe} pending</span>)
     return pills
@@ -146,7 +146,7 @@ export function HomeScreen({ sessions, onSelectSession, onStartSession, activeSe
 
         <div className="stats-strip">
           <div className="stat-cell approved"><div className="stat-number">{statNum(stats.approved)}</div><div className="stat-label">Approved</div></div>
-          <div className="stat-cell vaulted"><div className="stat-number">{statNum(stats.vaulted)}</div><div className="stat-label">Vaulted</div></div>
+          <div className="stat-cell vaulted"><div className="stat-number">{statNum(stats.vaulted)}</div><div className="stat-label">Vault</div></div>
           <div className="stat-cell rejected"><div className="stat-number">{statNum(stats.rejected)}</div><div className="stat-label">Rejected</div></div>
           <div className="stat-cell pending"><div className="stat-number">{statNum(stats.pending)}</div><div className="stat-label">Pending</div></div>
         </div>

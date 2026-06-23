@@ -22,7 +22,7 @@ function verdictClass(v: string | null | undefined): string {
 
 function verdictLabel(v: string | null | undefined): string {
   if (v === 'approve') return 'Approved'
-  if (v === 'vault') return 'Vaulted'
+  if (v === 'vault') return 'Vault'
   if (v === 'reject') return 'Rejected'
   return 'Pending'
 }

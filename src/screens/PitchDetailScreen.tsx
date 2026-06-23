@@ -9,7 +9,20 @@ import { VerdictStrip } from '../components/VerdictStrip'
 
 const VOICE_KEY = 'lemon_voice'
 const NOTE_KEY = (id: string) => `pitch-note-${id}`
-const VERDICT_LABELS: Record<string, string> = { approve: 'Approved', vault: 'Vaulted', reject: 'Rejected' }
+const VERDICT_LABELS: Record<string, string> = { approve: 'Approved', vault: 'Vault', reject: 'Rejected' }
+
+const ALLOWED_VOICE_IDS = new Set([
+  'IKne3meq5aSn9XLyUdCD', // Charlie - Deep, Confident, Energetic
+  'JBFqnCBsd6RMkjVDRZzb', // George - Warm, Captivating Storyteller
+  'FF7KdobWPaiR0vkcALHF', // David - Epic Movie Trailer
+  'nPczCjzI2devNBz1zQrb', // Brian - Deep, Resonant and Comforting
+  'e6jXBfaeBHpXh71h9m2Z', // Enrique Rocha™ - Mexican Storyteller
+  'cjVigY5qzO86Huf0OWal', // Eric - Smooth, Trustworthy
+  'pqHfZKP75CvOlQylNhV4', // Bill - Wise, Mature, Balanced
+  'EXAVITQu4vr4xnSDxMaL', // Sarah - Mature, Reassuring, Confident
+  'XrExE9yKIg1WjnnlVkGX', // Matilda - Knowledgable, Professional
+  '452WrNT9o8dphaYW5YGU', // Abel - Reflective, Clear, Expressive (Latin American)
+])
 
 export type KeyboardAction = 'play' | 'approve' | 'vault' | 'reject' | 'prev' | 'next' | 'skip' | 'undo' | null
 
@@ -247,9 +260,10 @@ export function PitchDetailScreen({
     else localStorage.removeItem(NOTE_KEY(projectId))
   }
 
+  const allowedVoices = voices.filter(v => ALLOWED_VOICE_IDS.has(v.id))
   const filteredVoices = voiceSearch
-    ? voices.filter(v => v.name.toLowerCase().includes(voiceSearch.toLowerCase()))
-    : voices
+    ? allowedVoices.filter(v => v.name.toLowerCase().includes(voiceSearch.toLowerCase()))
+    : allowedVoices
 
   return (
     <div className="screen" style={{ position: 'relative' }}>

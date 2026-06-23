@@ -33,7 +33,7 @@ export function VaultScreen({ onBack }: Props) {
       <div className="scroll-area">
         {loading && <div className="empty-state">Loading…</div>}
         {!loading && pitches.length === 0 && (
-          <div className="empty-state">No vaulted pitches</div>
+          <div className="empty-state">No vault pitches</div>
         )}
         {pitches.map(p => (
           <div key={p.projectId} className="vault-row">
@@ -44,7 +44,7 @@ export function VaultScreen({ onBack }: Props) {
                 {p.format}{p.genre ? ` · ${p.genre}` : ''}
               </div>
             </div>
-            <span className="pill vaulted">VLT</span>
+            <span className="pill vaulted">Vault</span>
           </div>
         ))}
       </div>

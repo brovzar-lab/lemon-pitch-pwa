@@ -18,10 +18,35 @@ function verdictClass(v: VerdictStatus | undefined): string {
 }
 
 function verdictLabel(v: VerdictStatus | undefined): string {
-  if (v === 'approve') return 'OK'
-  if (v === 'vault') return 'VLT'
-  if (v === 'reject') return 'REJ'
+  if (v === 'approve') return 'Approved'
+  if (v === 'vault') return 'Vault'
+  if (v === 'reject') return 'Rejected'
   return '—'
+}
+
+const GENRE_MAP: Record<string, string> = {
+  'Comedy':                                'Comedy',
+  'Dark Comedy':                           'Comedy',
+  'Political Comedy':                      'Comedy',
+  'Romantic Comedy':                       'Comedy',
+  'Comedy/Drama':                          'Comedy-Drama',
+  'Comedy-Drama':                          'Comedy-Drama',
+  'Dark Comedy-Drama':                     'Comedy-Drama',
+  'Drama/Family Saga':                     'Drama',
+  'Prestige Drama':                        'Drama',
+  'Prestige Drama/Psychological Thriller': 'Drama',
+  'Prestige Drama/Supernatural':           'Drama',
+  'Political Drama/Thriller':              'Drama',
+  'Horror':                                'Horror',
+  'Thriller':                              'Thriller',
+  'Legal Thriller':                        'Thriller',
+  'Political Thriller/Legal Thriller':     'Thriller',
+  'Crime Procedural/Supernatural Thriller':'Crime',
+}
+
+function normalizeGenre(genre: string | undefined): string | undefined {
+  if (!genre) return undefined
+  return GENRE_MAP[genre] ?? genre
 }
 
 function formatLabel(format: string): string {
@@ -46,12 +71,14 @@ export function PitchQueue({ pitches, currentProjectId, session, skippedIds, onS
   })
 
   const formats = ['ALL', ...Array.from(new Set(sorted.map(p => p.format).filter((f): f is string => !!f))).sort()]
-  const genres = ['ALL', ...Array.from(new Set(sorted.map(p => p.genre).filter((g): g is string => !!g))).sort()]
+  const genres = ['ALL', ...Array.from(new Set(
+    sorted.map(p => normalizeGenre(p.genre)).filter((g): g is string => !!g)
+  )).sort()]
   const hasGenres = genres.length > 1
 
   const filtered = sorted.filter(p => {
     if (formatFilter !== 'ALL' && p.format !== formatFilter) return false
-    if (genreFilter !== 'ALL' && p.genre !== genreFilter) return false
+    if (genreFilter !== 'ALL' && normalizeGenre(p.genre) !== genreFilter) return false
     return true
   })
 
@@ -68,8 +95,8 @@ export function PitchQueue({ pitches, currentProjectId, session, skippedIds, onS
         <div className="pitch-queue-filter-row">
           {formats.map(fmt => {
             const count = fmt === 'ALL'
-              ? sorted.filter(p => genreFilter === 'ALL' || p.genre === genreFilter).length
-              : sorted.filter(p => p.format === fmt && (genreFilter === 'ALL' || p.genre === genreFilter)).length
+              ? sorted.filter(p => genreFilter === 'ALL' || normalizeGenre(p.genre) === genreFilter).length
+              : sorted.filter(p => p.format === fmt && (genreFilter === 'ALL' || normalizeGenre(p.genre) === genreFilter)).length
             return (
               <button
                 key={fmt}
@@ -86,7 +113,7 @@ export function PitchQueue({ pitches, currentProjectId, session, skippedIds, onS
             {genres.map(genre => {
               const count = genre === 'ALL'
                 ? sorted.filter(p => formatFilter === 'ALL' || p.format === formatFilter).length
-                : sorted.filter(p => p.genre === genre && (formatFilter === 'ALL' || p.format === formatFilter)).length
+                : sorted.filter(p => normalizeGenre(p.genre) === genre && (formatFilter === 'ALL' || p.format === formatFilter)).length
               return (
                 <button
                   key={genre}
