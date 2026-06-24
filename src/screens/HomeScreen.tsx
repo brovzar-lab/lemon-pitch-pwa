@@ -83,8 +83,10 @@ export function HomeScreen({ sessions, onSelectSession, onStartSession, activeSe
     .filter(p => formatFilter === 'ALL' || p.format === formatFilter)
     .filter(p => !search || p.title.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => {
-      const ap = !DECIDED_STAGES.has(a.devStage ?? ''), bp = !DECIDED_STAGES.has(b.devStage ?? '')
-      return ap !== bp ? (ap ? -1 : 1) : a.pitchNumber - b.pitchNumber
+      if (a.receivedAt && b.receivedAt) {
+        return new Date(b.receivedAt).getTime() - new Date(a.receivedAt).getTime()
+      }
+      return b.pitchNumber - a.pitchNumber
     })
 
   const handleCTA = () => {

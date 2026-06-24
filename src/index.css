@@ -1841,7 +1841,7 @@ body::before {
 
   .roster-header-row {
     display: grid;
-    grid-template-columns: 36px 1fr 70px 110px 40px 70px;
+    grid-template-columns: 36px 1fr 70px 110px 62px 70px;
     padding: 6px 20px;
     background: var(--bg3);
     border-bottom: 1px solid var(--border);
@@ -1869,7 +1869,7 @@ body::before {
 
   .roster-row {
     display: grid;
-    grid-template-columns: 36px 1fr 70px 110px 40px 70px;
+    grid-template-columns: 36px 1fr 70px 110px 62px 70px;
     align-items: center;
     padding: 7px 20px;
     border-bottom: 1px solid var(--border);
@@ -1892,6 +1892,14 @@ body::before {
     font-variant-numeric: tabular-nums;
   }
 
+  .roster-title-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    overflow: hidden;
+    padding-right: 12px;
+  }
+
   .roster-title {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -1899,7 +1907,16 @@ body::before {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    padding-right: 12px;
+  }
+
+  .roster-logline {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
   }
 
   .roster-format {
@@ -1922,13 +1939,12 @@ body::before {
     text-transform: lowercase;
   }
 
-  .roster-audio {
-    font-size: 12px;
-  }
-
-  .audio-ready {
-    color: var(--green);
-    font-size: 12px;
+  .roster-received {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-2);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
 
   .roster-verdict {

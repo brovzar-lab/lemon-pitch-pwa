@@ -30,16 +30,23 @@ export async function fetchStats(): Promise<BackendStats> {
   return res.json() as Promise<BackendStats>
 }
 
+function mapRosterPitch(raw: Record<string, unknown>): PitchSummary {
+  const { createdAt, ...rest } = raw as Record<string, unknown> & { createdAt?: string }
+  return { ...(rest as unknown as PitchSummary), receivedAt: createdAt ?? undefined }
+}
+
 export async function fetchRoster(): Promise<PitchSummary[]> {
   const res = await fetch(`${API_BASE}/pitches/roster`)
   if (!res.ok) throw new Error(`Roster fetch failed: ${res.status}`)
-  return res.json() as Promise<PitchSummary[]>
+  const raw = await res.json() as Record<string, unknown>[]
+  return raw.map(mapRosterPitch)
 }
 
 export async function triggerRefresh(): Promise<{ synced: string; pitches: PitchSummary[] }> {
   const res = await fetch(`${API_BASE}/refresh`, { method: 'POST' })
   if (!res.ok) throw new Error(`Refresh failed: ${res.status}`)
-  return res.json()
+  const raw = await res.json() as { synced: string; pitches: Record<string, unknown>[] }
+  return { synced: raw.synced, pitches: raw.pitches.map(mapRosterPitch) }
 }
 
 export function audioUrl(projectId: string, voiceId?: string): string {

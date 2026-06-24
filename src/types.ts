@@ -5,6 +5,8 @@ export interface PitchSummary {
   title: string
   format: string
   genre?: string
+  logline?: string
+  receivedAt?: string
   projectId: string
   hasSpeech: boolean
   verdictStatus: VerdictStatus

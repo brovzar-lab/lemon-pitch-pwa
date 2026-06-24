@@ -59,7 +59,7 @@ export function PitchRoster({ roster, loading, formatFilter, onFilterChange, sea
           <span>TITLE</span>
           <span>FORMAT</span>
           <span>STAGE</span>
-          <span>AUDIO</span>
+          <span>RECEIVED</span>
           <span>VERDICT</span>
         </div>
 
@@ -69,13 +69,23 @@ export function PitchRoster({ roster, loading, formatFilter, onFilterChange, sea
         {roster.map(p => {
           const stage = p.devStage ?? 'pitch'
           const decided = ['development','killed','vaulted','passed','greenlit','packaging'].includes(stage)
+          const receivedLabel = p.receivedAt
+            ? new Date(p.receivedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            : '—'
           return (
             <div key={p.projectId} className={`roster-row${decided ? '' : ' pending'}`}>
               <span className="roster-num">{p.pitchNumber}</span>
-              <span className="roster-title">{p.title}</span>
+              <div className="roster-title-cell">
+                <span className="roster-title">{p.title}</span>
+                {p.logline && (
+                  <span className="roster-logline">
+                    {p.logline.slice(0, 80)}{p.logline.length > 80 ? '…' : ''}
+                  </span>
+                )}
+              </div>
               <span className="roster-format">{p.format}</span>
               <span className={`roster-stage ${STAGE_CLASS[stage] ?? 'stage-pitch'}`}>{STAGE_LABEL[stage] ?? stage}</span>
-              <span className="roster-audio">{p.hasSpeech ? <span className="audio-ready">♪</span> : null}</span>
+              <span className="roster-received">{receivedLabel}</span>
               <span className="roster-verdict">
                 {p.verdictStatus === 'approve' && <span className="pill approved">✓</span>}
                 {p.verdictStatus === 'vault'   && <span className="pill vaulted">V</span>}
