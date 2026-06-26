@@ -3,6 +3,12 @@ import type { Session, PitchSummary, AllTimeStats, BackendStats } from '../types
 import { fetchPitches, fetchStats, isDemo } from '../api'
 import { DEMO_PITCHES, DEMO_SESSIONS, DEMO_STATS } from '../demo'
 
+const STALE_MS = 24 * 60 * 60 * 1000
+
+function isSessionStale(session: Session): boolean {
+  return Date.now() - new Date(session.createdAt).getTime() > STALE_MS
+}
+
 interface Props {
   sessions: Session[]
   activeSessionId: string | null
@@ -10,7 +16,7 @@ interface Props {
   isHome: boolean
   onSelectSession: (id: string) => void
   onStartSession: (pitches: PitchSummary[]) => void
-  onRefresh: () => void
+  onRefresh: () => Promise<{ synced: string; pitches: PitchSummary[] } | null>
   onVaultOpen: () => void
   onRenameSession: (sessionId: string, name: string) => void
   syncing: boolean
@@ -58,6 +64,11 @@ export function Sidebar({
     if (isDemo) return
     fetchStats().then(setBackendStats).catch(() => {})
   }, [])
+
+  const handleRefresh = async () => {
+    const result = await onRefresh()
+    if (result) setPitches(result.pitches)
+  }
 
   const displaySessions = isDemo ? DEMO_SESSIONS : sessions
   const localStats = isDemo ? DEMO_STATS : computeStats(sessions)
@@ -159,6 +170,9 @@ export function Sidebar({
                   {s.name}
                 </span>
                 <div className="sidebar-session-pills">{pillForSession(s)}</div>
+                {!isDemo && isSessionStale(s) && (
+                  <div className="sidebar-session-stale">⚠ Data may be outdated</div>
+                )}
               </div>
             ))}
           </>
@@ -178,7 +192,7 @@ export function Sidebar({
 
       {/* Dev Gate sync */}
       <div className="sidebar-refresh">
-        <button className="sidebar-refresh-btn" onClick={onRefresh} disabled={syncing}>
+        <button className="sidebar-refresh-btn" onClick={handleRefresh} disabled={syncing}>
           {syncing ? '↻ Syncing…' : '↻ Sync Dev Gate'}
         </button>
       </div>

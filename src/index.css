@@ -309,6 +309,14 @@ body::before {
     flex-wrap: wrap;
   }
 
+  .sidebar-session-stale {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--vault);
+    margin-top: 4px;
+    opacity: 0.8;
+  }
+
   .sidebar-cta {
     padding: 12px;
     border-top: 1px solid var(--border);

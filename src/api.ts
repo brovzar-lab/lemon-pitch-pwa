@@ -7,25 +7,25 @@ const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? ''
 export const isDemo = !API_BASE || API_BASE === 'PLACEHOLDER'
 
 export async function fetchPitches(): Promise<PitchSummary[]> {
-  const res = await fetch(`${API_BASE}/pitches`)
+  const res = await fetch(`${API_BASE}/pitches`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch pitches: ${res.status}`)
   return res.json() as Promise<PitchSummary[]>
 }
 
 export async function fetchPitchDetail(projectId: string): Promise<PitchDetail> {
-  const res = await fetch(`${API_BASE}/pitches/${projectId}`)
+  const res = await fetch(`${API_BASE}/pitches/${projectId}`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch pitch: ${res.status}`)
   return res.json() as Promise<PitchDetail>
 }
 
 export async function fetchVoices(): Promise<Voice[]> {
-  const res = await fetch(`${API_BASE}/voices`)
+  const res = await fetch(`${API_BASE}/voices`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch voices: ${res.status}`)
   return res.json() as Promise<Voice[]>
 }
 
 export async function fetchStats(): Promise<BackendStats> {
-  const res = await fetch(`${API_BASE}/stats`)
+  const res = await fetch(`${API_BASE}/stats`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`)
   return res.json() as Promise<BackendStats>
 }
@@ -36,7 +36,7 @@ function mapRosterPitch(raw: Record<string, unknown>): PitchSummary {
 }
 
 export async function fetchRoster(): Promise<PitchSummary[]> {
-  const res = await fetch(`${API_BASE}/pitches/roster`)
+  const res = await fetch(`${API_BASE}/pitches/roster`, { cache: 'no-store' })
   if (!res.ok) throw new Error(`Roster fetch failed: ${res.status}`)
   const raw = await res.json() as Record<string, unknown>[]
   return raw.map(mapRosterPitch)
